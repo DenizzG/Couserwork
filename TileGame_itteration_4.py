@@ -18,16 +18,20 @@ background = pygame.Surface(screen.get_size())
 background = background.convert()
 pygame.display.set_caption("Tile Game")
 
-#font = pygame.font.Font('freesansbold.ttf', 40)
-#text = font.render("ASKFJHBSDGBLKSBGKJSNG", True, RED, RED)
-#textRect = text.get_rect()
-#textRect.center = (1150, 1080)
-
 
 class Award(pygame.sprite.Sprite):
     def __init__(self, x, y, color):
         super().__init__()
         self.image = pygame.Surface([35, 35])
+        self.image.fill(color)
+        self.rect = self.image.get_rect()
+        self.rect.y = y
+        self.rect.x = x
+
+class Keyz(pygame.sprite.Sprite):
+    def __init__(self, x, y, color):
+        super().__init__()
+        self.image = pygame.Surface([20, 20])
         self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.y = y
@@ -47,6 +51,15 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, color):
         super().__init__()
         self.image = pygame.Surface([38, 38])
+        self.image.fill(color)
+        self.rect = self.image.get_rect()
+        self.rect.y = y
+        self.rect.x = x
+
+class Bullets(pygame.sprite.Sprite):
+    def __init__(self, x, y, color):
+        super().__init__()
+        self.image = pygame.Surface([10, 10])
         self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.y = y
@@ -90,10 +103,21 @@ class Player(pygame.sprite.Sprite):
         award_hit_list = pygame.sprite.spritecollide(self, award_group, False)
 
         for award in award_hit_list:
-            player_one.score = player_one.score + 1
-            player_one.points = player_one.points + 1
-            level_delete()
-            level_setup(levels[player_one.points])
+            if player_one.keys == 3:
+                award_one.color = YELLOW
+                player_one.score = player_one.score + 1
+                player_one.points = player_one.points + 1
+                level_delete()
+                level_setup(levels[player_one.points])
+            else:
+                award_one.color = BLUE
+
+        keys_hit_list = pygame.sprite.spritecollide(self, keys_group, True)
+
+        for keyss in keys_hit_list:
+            player_one.keys = player_one.keys + 1
+
+
 
         self.rect.y += self.change_y  # move up/down
 
@@ -120,7 +144,7 @@ level_1 = [
     "X        XX     XXXX    X",
     "X  XXX    XXXXXXXXX     X",
     "X  XX                   X",
-    "X      XXXXX            X",
+    "X      XXXXX    K K K   X",
     "X         XXXXXX        X",
     "X    XXXX  XXXX     X   X",
     "X    XXXX       XX XX   X",
@@ -192,6 +216,7 @@ level_3 = [
     "XXXXXXXXXXXXXXXXXXXXXXXXX",
 ]
 
+keys_group = pygame.sprite.Group()
 award_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 wall_group = pygame.sprite.Group()
@@ -230,11 +255,17 @@ def level_setup(level):
                 award_one.rect.y = screen_y
                 award_one.rect.x = screen_x
 
+            if character == ("K"):
+                key = Keyz(screen_x, screen_y, YELLOW)
+                all_sprites_group.add(key)
+                keys_group.add(key)
+
 
 def level_delete():
     for wall in wall_group:
         wall_group.remove(wall)
         all_sprites_group.remove(wall)
+        player_one.keys = 0
 
 
 done = False
@@ -288,6 +319,8 @@ while not done:
     Score = 'Score: ' + str(player_one.score)
     Money = 'Money: ' + str(player_one.money)
     Bullets = 'Bullets: ' + str(player_one.bullets)
+    Keys_text = 'Keys: ' + str(player_one.keys)
+
 
 
 
@@ -305,6 +338,8 @@ while not done:
     screen.blit(text, [1010, 90])
     text = font.render(Money, True, WHITE)
     screen.blit(text, [1010, 130])
+    text = font.render(Keys_text, True, WHITE)
+    screen.blit(text, [1010, 170])
 
 
 
